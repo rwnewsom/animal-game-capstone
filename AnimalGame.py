@@ -338,6 +338,10 @@ class AnimalGame:
                     if is_blocked:
                         return False
                 # only need to validate if greater than 1 move
+                else:
+                    # jumpers must use all movement
+                    if max(row_distance, column_distance) != selected_piece.get_distance():
+                        return False
                 #fixme check guidance - enforce for all moves?
                 is_orthogonal = row_distance == 0 or column_distance == 0
                 if is_orthogonal:
@@ -529,6 +533,19 @@ class TestAnimalGame(unittest.TestCase):
         result = game.make_move('f7', 'f5')
         self.assertFalse(result)
         game.print_board()
+
+    def test_jumping_piece_must_use_full_distance(self):
+        """
+        a jumping piece must use all available distance
+        """
+        game = AnimalGame()
+        bad_jump = game.make_move('f1', 'f3')
+        # may not jump unless full distance
+        self.assertFalse(bad_jump)
+        # may jump full distance
+        good_jump = game.make_move('f1', 'f5')
+        game.print_board()
+        self.assertTrue(good_jump)
 
     def test_unknown_value_on_board(self):
         """
