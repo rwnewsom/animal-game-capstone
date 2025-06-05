@@ -250,6 +250,22 @@ class AnimalGame:
         column_distance = start_column - end_column
         return row_distance, column_distance
 
+    def is_counter_move(self, piece, is_orthogonal):
+        """
+
+        :param piece: Piece object
+        :param is_orthogonal: bool - True if desired move is Orthogonal
+        :return: bool True if piece is moving alternate to normal direction
+        """
+        if piece.get_direction() == 'orthogonal':
+            if is_orthogonal:
+                return False
+            return True
+        else:
+            if is_orthogonal:
+                return True
+            return False
+
     def is_move_blocked(self, start_row, start_column, end_row, end_column):
         """
         determine how many positions the piece will move
@@ -330,26 +346,31 @@ class AnimalGame:
             if max(abs(row_dist), abs(col_dist)) > selected_piece.get_distance():
                 return False
             row_distance, column_distance = abs(row_dist), abs(col_dist)
+            is_orthogonal = row_distance == 0 or column_distance == 0
 
-            if max(row_distance, column_distance) > 1:
+            if max(row_distance, column_distance) > 0:
                 if selected_piece.get_locomotion() == 'sliding':
                     is_blocked = self.is_move_blocked(start_row_index, start_column_index, end_row_index,
                                                       end_column_index)
                     if is_blocked:
                         return False
-                # only need to validate if greater than 1 move
                 else:
-                    # jumpers must use all movement
-                    if max(row_distance, column_distance) != selected_piece.get_distance():
-                        return False
-                #fixme check guidance - enforce for all moves?
-                is_orthogonal = row_distance == 0 or column_distance == 0
+                    # jumpers must use all movement UNLESS dist is 1 and counter to normal direction
+                    if max(row_distance, column_distance) == 1:
+                        if not self.is_counter_move(selected_piece, is_orthogonal):
+                            return False
+                    else:
+                        if max(row_distance, column_distance) != selected_piece.get_distance():
+                            return False
+
                 if is_orthogonal:
                     if selected_piece.get_direction() == 'diagonal':
-                        return False
+                        if max(row_distance, column_distance) != 1:
+                            return False
                 else:
                     if selected_piece.get_direction() == 'orthogonal':
-                        return False
+                        if max(row_distance, column_distance) != 1:
+                            return False
 
             destination_value = self._board[end_row_index][end_column_index]
 
@@ -523,10 +544,11 @@ class TestAnimalGame(unittest.TestCase):
         game.print_board()
 
         # now handle capture logic!!
-        result = game.make_move('b5', 'c4')
+        result = game.make_move('b5', 'b4')
         self.assertTrue(result)
+        game.make_move('c4', 'b4')
         game_state = game.get_game_state()
-        self.assertEqual(game_state, 'AMETHYST_WON')
+        self.assertEqual(game_state, 'TANGERINE_WON')
         game.print_board()
 
         # should not be able to move further this game
@@ -563,14 +585,16 @@ class TestAnimalGame(unittest.TestCase):
 
         game = AnimalGame()
         # set cuttlefish in front of emu
-        first_legal_move = game.make_move('d1', 'c2')
+        game.print_board()
+        first_legal_move = game.make_move('a1', 'a2')
         self.assertTrue(first_legal_move)
+        game.print_board()
         # make opposing move to increment turn
 
         second_legal_move = game.make_move('a7', 'a6')
         self.assertTrue(second_legal_move)
-
-        # try tp move emu past cuttlefish
-        result = game.make_move('c1', 'c3')
+        game.print_board()
+        # try tp move emu past wombat
+        result = game.make_move('c1', 'a1')
         game.print_board()
         self.assertFalse(result)
