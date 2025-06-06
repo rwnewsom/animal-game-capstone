@@ -177,9 +177,9 @@ class AnimalGame:
         self._animal_order = [Chinchilla, Wombat, Emu, Cuttlefish, Emu, Wombat, Chinchilla]
         # ... on the first and last row
         self._starting_rows = [0, 6]
-        self.setup_game()
+        self._setup_game()
 
-    def setup_game(self):
+    def _setup_game(self):
         """
         initializes the board for both players, instantiating pieces with appropriate colors
         """
@@ -190,19 +190,19 @@ class AnimalGame:
                 animal = animal(color=color)
                 self._board[j][i] = animal
 
-    def get_current_player(self):
+    def _get_current_player(self):
         return self._turn_order[self._current_turn % 2]
 
-    def get_current_turn(self):
+    def _get_current_turn(self):
         return self._current_turn
 
-    def print_board(self):
+    def _print_board(self):
         """
         display the current board through a series of print statements
         """
         print(f'Board for turn: {self._current_turn}')
         print(f'Game Status: {self._game_state}')
-        print(f'Current Player: {self.get_current_player()}')
+        print(f'Current Player: {self._get_current_player()}')
         print('|-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-|')
         print('|   a    b    c    d    e    f    g')
         print('|-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-|')
@@ -210,18 +210,18 @@ class AnimalGame:
             print(f'{i+1}|{row}|')
         print('|-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-|')
 
-    def get_game_state(self):
+    def _get_game_state(self):
         """ retrieve the current state of the game, which is initially 'UNFINISHED',
         however may become either 'TANGERINE_WON' OR 'AMETHYST_WON' """
         return self._game_state
 
-    def map_column_to_index(self, column):
+    def _map_column_to_index(self, column):
         """helper function that converts char to its array index
         column: char - the column (a..g) to be mapped
         """
         return self._columns.index(column)
 
-    def validate_move_in_bounds(self, start_column, start_row, end_column, end_row):
+    def _validate_move_in_bounds(self, start_column, start_row, end_column, end_row):
         """
         Check if either starting or ending coordinates are not within bounds of the game board
         :param start_column: char - starting column for piece
@@ -237,7 +237,7 @@ class AnimalGame:
         else:
             return True
 
-    def calculate_distance(self, start_row, start_column, end_row, end_column):
+    def _calculate_distance(self, start_row, start_column, end_row, end_column):
         """
         determine how many positions the piece will move
         :param start_column: int - starting column for piece
@@ -250,7 +250,7 @@ class AnimalGame:
         column_distance = start_column - end_column
         return row_distance, column_distance
 
-    def is_counter_move(self, piece, is_orthogonal):
+    def _is_counter_move(self, piece, is_orthogonal):
         """
 
         :param piece: Piece object
@@ -266,7 +266,7 @@ class AnimalGame:
                 return True
             return False
 
-    def is_move_blocked(self, start_row, start_column, end_row, end_column):
+    def _is_move_blocked(self, start_row, start_column, end_row, end_column):
         """
         determine how many positions the piece will move
         :param start_column: int - starting column for piece
@@ -275,7 +275,7 @@ class AnimalGame:
         :param end_row: int - ending row for piece
         :returns: bool true is movement is blocked
         """
-        row_distance, column_distance = self.calculate_distance(start_row, start_column, end_row, end_column)
+        row_distance, column_distance = self._calculate_distance(start_row, start_column, end_row, end_column)
         if row_distance != 0 and column_distance != 0:
             return True # only orthogonal moves can be blocked, diag animals jump or only have dist of 1
         if row_distance == 0 and column_distance == 0:
@@ -293,29 +293,29 @@ class AnimalGame:
                 end_column += 1
             elif column_distance < 0:
                 column_distance -= 1
-            return self.is_move_blocked(start_row, start_column, end_row, end_column)
+            return self._is_move_blocked(start_row, start_column, end_row, end_column)
 
-    def make_move(self, start, end):
+    def _make_move(self, start, end):
         """
         :param start: str- algebraic notation of starting position, e.g. 'a1' for column a row 1
         :param end: str-  algebraic notation of ending position, e.g. 'a2' for column a row 2
         :return: bool: false if game has been won or move illegal, else true
         """
         # cannot continue to play if game is in finished state
-        is_game_active = self.get_game_state() == 'UNFINISHED'
+        is_game_active = self._get_game_state() == 'UNFINISHED'
         if not is_game_active:
             return False
 
         start_column, start_row = start[0], start[1]
         end_column, end_row = end[0], end[1]
 
-        is_in_bounds = self.validate_move_in_bounds(start_column, start_row, end_column, end_row)
+        is_in_bounds = self._validate_move_in_bounds(start_column, start_row, end_column, end_row)
         if not is_in_bounds:
             return False
 
         start_row_index = int(start_row) - 1 # cast to int and adjust for zero based indexing
 
-        start_column_index = self.map_column_to_index(start_column)
+        start_column_index = self._map_column_to_index(start_column)
         selected_piece = self._board[start_row_index][start_column_index]
 
         # a piece must exist at the selected location
@@ -328,16 +328,16 @@ class AnimalGame:
             raise UnknownValueException(message)
 
         selected_piece_color = selected_piece.get_color()
-        current_player = self.get_current_player()
+        current_player = self._get_current_player()
         # piece must have same color as current player
         if selected_piece_color != current_player:
             return False
 
         else:
             end_row_index = int(end_row) - 1
-            end_column_index = self.map_column_to_index(end_column)
+            end_column_index = self._map_column_to_index(end_column)
 
-            row_dist, col_dist = self.calculate_distance(
+            row_dist, col_dist = self._calculate_distance(
                 start_row_index, start_column_index, end_row_index, end_column_index
             )
             if max(abs(row_dist), abs(col_dist)) > selected_piece.get_distance():
@@ -350,14 +350,14 @@ class AnimalGame:
 
             if max(row_distance, column_distance) > 0:
                 if selected_piece.get_locomotion() == 'sliding':
-                    is_blocked = self.is_move_blocked(start_row_index, start_column_index, end_row_index,
-                                                      end_column_index)
+                    is_blocked = self._is_move_blocked(start_row_index, start_column_index, end_row_index,
+                                                       end_column_index)
                     if is_blocked:
                         return False
                 else:
                     # jumpers must use all movement UNLESS dist is 1 and counter to normal direction
                     if max(row_distance, column_distance) == 1:
-                        if not self.is_counter_move(selected_piece, is_orthogonal):
+                        if not self._is_counter_move(selected_piece, is_orthogonal):
                             return False
                     else:
                         if max(row_distance, column_distance) != selected_piece.get_distance():
@@ -453,18 +453,18 @@ class TestAnimalGame(unittest.TestCase):
     def test_get_current_player(self):
         """first player should be tangerine"""
         game = AnimalGame()
-        current_player = game.get_current_player()
+        current_player = game._get_current_player()
         self.assertEqual(current_player, 'tangerine')
 
     def test_get_current_turn(self):
         """game should initialize at turn 0"""
         game = AnimalGame()
-        self.assertEqual(game.get_current_turn(), 0)
+        self.assertEqual(game._get_current_turn(), 0)
 
     def test_get_game_state(self):
         """initial game state should be unfinished"""
         game = AnimalGame()
-        self.assertEqual(game.get_game_state(), 'UNFINISHED')
+        self.assertEqual(game._get_game_state(), 'UNFINISHED')
 
 
     def test_setup_game(self):
@@ -476,7 +476,7 @@ class TestAnimalGame(unittest.TestCase):
         initial_tangerine_piece = game._board[0][0]
         self.assertIsInstance(initial_tangerine_piece, Chinchilla)
         # and type should match current player
-        current_player = game.get_current_player()
+        current_player = game._get_current_player()
         self.assertEqual(initial_tangerine_piece.get_color(), current_player)
 
         # creature on last row, first column should also be a Chinchilla
@@ -488,27 +488,38 @@ class TestAnimalGame(unittest.TestCase):
     def test_map_column_to_index(self):
         """test helper function that converts char to its array index"""
         game = AnimalGame()
-        result = [game.map_column_to_index(i) for i in game._columns]
+        result = [game._map_column_to_index(i) for i in game._columns]
         self.assertEqual(result, [0,1,2,3,4,5,6])
+
+    def test_calculate_distance(self):
+        game = AnimalGame()
+        result = game._calculate_distance(2, 2, 1, 1)
+        self.assertEqual(result, (1, 1))
+
 
     def test_validate_move_invalid(self):
         """ series of tests to determine if invalid moves are flagged """
         game = AnimalGame()
         # should not be able to choose if no piece exists
-        result = game.make_move('a3', 'b2')
+        result = game._make_move('a3', 'b2')
         self.assertFalse(result)
 
         # should not be able to move opponent's piece
-        result = game.make_move('a7', 'a6')
+        result = game._make_move('a7', 'a6')
         self.assertFalse(result)
 
         # should not be able to move on top of own piece
-        result = game.make_move('a1', 'b1')
+        result = game._make_move('a1', 'b1')
         self.assertFalse(result)
 
-        # should not be able to move off the board - column
-        result = game.make_move('a1', 'h1')
+
+
+    def test_validate_move_in_bounds(self):
+        """should not be able to move off the board - column"""
+        game = AnimalGame()
+        result = game._make_move('a1', 'h1')
         self.assertFalse(result)
+
 
     def test_make_valid_move(self):
         """
@@ -519,55 +530,55 @@ class TestAnimalGame(unittest.TestCase):
         """
         game = AnimalGame()
         # should be allowed to move a distance of one - orthogonal when piece movement is diagonal
-        result = game.make_move('d1', 'd2')
+        result = game._make_move('d1', 'd2')
         self.assertTrue(result)
 
         # should increment turn and change current player
-        result = game.get_current_turn()
+        result = game._get_current_turn()
         self.assertEqual(result, 1)
 
         # should be next players turn
-        current_player = game.get_current_player()
+        current_player = game._get_current_player()
         assert current_player == 'amethyst'
 
         # should not allow a diagonal piece to move greater than 1 unit diagonally
 
-        result = game.make_move('a7', 'a5')
+        result = game._make_move('a7', 'a5')
         self.assertFalse(result)
 
         # should allow diagonal move
-        result = game.make_move('d7', 'b5')
+        result = game._make_move('d7', 'b5')
         self.assertTrue(result)
-        game.print_board()
+        game._print_board()
 
         # next player makes diagonal move
-        result = game.make_move('d2', 'b4')
+        result = game._make_move('d2', 'b4')
         self.assertTrue(result)
-        game.print_board()
+        game._print_board()
 
         # now handle capture logic!!
-        result = game.make_move('b5', 'b4')
+        result = game._make_move('b5', 'b4')
         self.assertTrue(result)
-        game_state = game.get_game_state()
+        game_state = game._get_game_state()
         self.assertEqual(game_state, 'AMETHYST_WON')
-        game.print_board()
+        game._print_board()
 
         # should not be able to move further this game
-        result = game.make_move('f7', 'f5')
+        result = game._make_move('f7', 'f5')
         self.assertFalse(result)
-        game.print_board()
+        game._print_board()
 
     def test_jumping_piece_must_use_full_distance(self):
         """
         a jumping piece must use all available distance
         """
         game = AnimalGame()
-        bad_jump = game.make_move('f1', 'f3')
+        bad_jump = game._make_move('f1', 'f3')
         # may not jump unless full distance
         self.assertFalse(bad_jump)
         # may jump full distance
-        good_jump = game.make_move('f1', 'f5')
-        game.print_board()
+        good_jump = game._make_move('f1', 'f5')
+        game._print_board()
         self.assertTrue(good_jump)
 
     def test_unknown_value_on_board(self):
@@ -577,25 +588,32 @@ class TestAnimalGame(unittest.TestCase):
         game = AnimalGame()
         game._board[0][0] = None
         with self.assertRaises(UnknownValueException):
-            game.make_move('a1', 'a2')
+            game._make_move('a1', 'a2')
 
-    def test_blocked_move(self):
+    def test_is_move_blocked(self):
         """
         test that a sliding animal cannot make a move if any other piece it between its starting and ending location:
         """
-
         game = AnimalGame()
         # set cuttlefish in front of emu
-        game.print_board()
-        first_legal_move = game.make_move('a1', 'a2')
+        game._print_board()
+        first_legal_move = game._make_move('a1', 'a2')
         self.assertTrue(first_legal_move)
-        game.print_board()
+        game._print_board()
         # make opposing move to increment turn
 
-        second_legal_move = game.make_move('a7', 'a6')
+        second_legal_move = game._make_move('a7', 'a6')
         self.assertTrue(second_legal_move)
-        game.print_board()
+        game._print_board()
         # try tp move emu past wombat
-        result = game.make_move('c1', 'a1')
-        game.print_board()
+        result = game._make_move('c1', 'a1')
+        game._print_board()
         self.assertFalse(result)
+
+    def test_is_counter_move(self):
+        """test if a piece is making a move not IAW piece direction"""
+        game = AnimalGame()
+        piece = Cuttlefish()
+        is_orthogonal = True
+        result = game._is_counter_move(piece, is_orthogonal)
+        self.assertTrue(result)
