@@ -295,9 +295,6 @@ class AnimalGame:
                 column_distance -= 1
             return self.is_move_blocked(start_row, start_column, end_row, end_column)
 
-
-        return False
-
     def make_move(self, start, end):
         """
         :param start: str- algebraic notation of starting position, e.g. 'a1' for column a row 1
@@ -312,8 +309,8 @@ class AnimalGame:
         start_column, start_row = start[0], start[1]
         end_column, end_row = end[0], end[1]
 
-        is_valid_move = self.validate_move_in_bounds(start_column, start_row, end_column, end_row)
-        if not is_valid_move:
+        is_in_bounds = self.validate_move_in_bounds(start_column, start_row, end_column, end_row)
+        if not is_in_bounds:
             return False
 
         start_row_index = int(start_row) - 1 # cast to int and adjust for zero based indexing
@@ -346,6 +343,9 @@ class AnimalGame:
             if max(abs(row_dist), abs(col_dist)) > selected_piece.get_distance():
                 return False
             row_distance, column_distance = abs(row_dist), abs(col_dist)
+            if row_distance == 0 and column_distance == 0:
+                return False # not allowed to pass, that could stall game indefinitely
+
             is_orthogonal = row_distance == 0 or column_distance == 0
 
             if max(row_distance, column_distance) > 0:
@@ -368,6 +368,8 @@ class AnimalGame:
                         if max(row_distance, column_distance) != 1:
                             return False
                 else:
+                    if row_distance != column_distance:
+                        return False # diag must move one square each dir
                     if selected_piece.get_direction() == 'orthogonal':
                         if max(row_distance, column_distance) != 1:
                             return False
@@ -539,16 +541,15 @@ class TestAnimalGame(unittest.TestCase):
         game.print_board()
 
         # next player makes diagonal move
-        result = game.make_move('d2', 'c4')
+        result = game.make_move('d2', 'b4')
         self.assertTrue(result)
         game.print_board()
 
         # now handle capture logic!!
         result = game.make_move('b5', 'b4')
         self.assertTrue(result)
-        game.make_move('c4', 'b4')
         game_state = game.get_game_state()
-        self.assertEqual(game_state, 'TANGERINE_WON')
+        self.assertEqual(game_state, 'AMETHYST_WON')
         game.print_board()
 
         # should not be able to move further this game
