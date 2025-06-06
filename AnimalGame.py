@@ -210,7 +210,7 @@ class AnimalGame:
             print(f'{i+1}|{row}|')
         print('|-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-|')
 
-    def _get_game_state(self):
+    def get_game_state(self):
         """ retrieve the current state of the game, which is initially 'UNFINISHED',
         however may become either 'TANGERINE_WON' OR 'AMETHYST_WON' """
         return self._game_state
@@ -302,7 +302,7 @@ class AnimalGame:
         :return: bool: false if game has been won or move illegal, else true
         """
         # cannot continue to play if game is in finished state
-        is_game_active = self._get_game_state() == 'UNFINISHED'
+        is_game_active = self.get_game_state() == 'UNFINISHED'
         if not is_game_active:
             return False
 
@@ -464,7 +464,7 @@ class TestAnimalGame(unittest.TestCase):
     def test_get_game_state(self):
         """initial game state should be unfinished"""
         game = AnimalGame()
-        self.assertEqual(game._get_game_state(), 'UNFINISHED')
+        self.assertEqual(game.get_game_state(), 'UNFINISHED')
 
 
     def test_setup_game(self):
@@ -559,7 +559,7 @@ class TestAnimalGame(unittest.TestCase):
         # now handle capture logic!!
         result = game.make_move('b5', 'b4')
         self.assertTrue(result)
-        game_state = game._get_game_state()
+        game_state = game.get_game_state()
         self.assertEqual(game_state, 'AMETHYST_WON')
         game._print_board()
 
