@@ -240,125 +240,58 @@ class AnimalGame:
         :param end: str-  algebraic notation of ending position, e.g. 'a2' for column a row 2
         :return: bool: false if game has been won or move illegal, else true
         """
-        # cannot continue to play if game is in finished state
-        is_game_active = self.get_game_state() == 'UNFINISHED'
-        if not is_game_active:
-            self._last_error = 'Game is already finished.'
-            return False
-
-        start_column, start_row = start[0], start[1]
-        end_column, end_row = end[0], end[1]
-
-        is_in_bounds = self._validate_move_in_bounds(start_column, start_row, end_column, end_row)
-        if not is_in_bounds:
-            self._last_error = 'Move is out of bounds.'
-            return False
-
-        start_row_index = int(start_row) - 1 # cast to int and adjust for zero based indexing
-
-        start_column_index = self._map_column_to_index(start_column)
-        selected_piece = self._board[start_row_index][start_column_index]
-
-        # a piece must exist at the selected location
-        if selected_piece is None:
-            self._last_error = 'No piece at the starting square.'
-            return False
-
-        elif not isinstance(selected_piece, Piece):
-            # somehow an inappropriate value has been recorded on the board, perhaps a piece from a monopoly game?
-            message = f'unknown piece on board: {selected_piece}'
-            raise UnknownValueException(message)
-
-        # Help static analyzers: by this point selected_piece is guaranteed to be a Piece
-        assert isinstance(selected_piece, Piece)
-
-        selected_piece_color = selected_piece.get_color()
-        current_player = self._get_current_player()
-        # piece must have same color as current player
-        if selected_piece_color != current_player:
-            self._last_error = 'You must move your own piece.'
-            return False
-
-        else:
+        # Parse positions for initial validation and exception handling
+        try:
+            start_column, start_row = start[0], start[1]
+            end_column, end_row = end[0], end[1]
+            start_row_index = int(start_row) - 1
+            start_column_index = self._map_column_to_index(start_column)
             end_row_index = int(end_row) - 1
             end_column_index = self._map_column_to_index(end_column)
+        except (IndexError, ValueError):
+            self._last_error = 'Invalid algebraic notation.'
+            return False
 
-            row_dist, col_dist = self._calculate_distance(
-                start_row_index, start_column_index, end_row_index, end_column_index
-            )
-            if max(abs(row_dist), abs(col_dist)) > selected_piece.get_distance():
-                self._last_error = 'Move is too far for this piece.'
-                return False
-            row_distance, column_distance = abs(row_dist), abs(col_dist)
-            if row_distance == 0 and column_distance == 0:
-                self._last_error = 'Must move to a different square (cannot pass).'
-                return False # not allowed to pass, that could stall game indefinitely
+        # Check for unknown values on the board before calling is_legal_move
+        # This preserves exception-throwing behavior for corrupted board state
+        selected_piece = self._board[start_row_index][start_column_index]
+        destination_value = self._board[end_row_index][end_column_index]
 
-            is_orthogonal = row_distance == 0 or column_distance == 0
+        if selected_piece is not None and not isinstance(selected_piece, Piece):
+            message = f'unknown piece on board: {selected_piece}'
+            raise UnknownValueException(message)
+        if destination_value is not None and not isinstance(destination_value, Piece):
+            message = f'unknown piece on board: {destination_value}'
+            raise UnknownValueException(message)
 
-            if max(row_distance, column_distance) > 0:
-                if selected_piece.get_locomotion() == 'sliding':
-                    # fixme adjust so not checking destination
-                    is_blocked = self._is_move_blocked(start_row_index, start_column_index, end_row_index,
-                                                       end_column_index)
-                    if is_blocked:
-                        self._last_error = 'Move is blocked by another piece.'
-                        return False
-                else:
-                    # jumpers must use all movement UNLESS dist is 1 and counter to normal direction
-                    if max(row_distance, column_distance) == 1:
-                        if not self._is_counter_move(selected_piece, is_orthogonal):
-                            self._last_error = 'Jumping piece may only move 1 square as a counter-move.'
-                            return False
-                    else:
-                        if max(row_distance, column_distance) != selected_piece.get_distance():
-                            self._last_error = 'Jumping piece must use full movement distance.'
-                            return False
+        # Use is_legal_move to validate the move without duplicating logic
+        is_legal, is_capture, error_message = self.is_legal_move(start, end)
 
-                if is_orthogonal:
-                    if selected_piece.get_direction() == 'diagonal':
-                        if max(row_distance, column_distance) != 1:
-                            self._last_error = 'Diagonal piece can only move 1 square orthogonally as counter-move.'
-                            return False
-                else:
-                    if row_distance != column_distance:
-                        self._last_error = 'Diagonal moves must change row and column by the same amount.'
-                        return False # diag must move one square each dir
-                    if selected_piece.get_direction() == 'orthogonal':
-                        if max(row_distance, column_distance) != 1:
-                            self._last_error = 'Orthogonal-only piece can only move 1 square diagonally as counter-move.'
-                            return False
+        if not is_legal:
+            self._last_error = error_message
+            return False
 
-            destination_value = self._board[end_row_index][end_column_index]
+        # Move is legal, now execute the state mutation
+        # Help static analyzers: selected_piece is guaranteed to be a Piece at this point
+        assert isinstance(selected_piece, Piece)
 
-            if isinstance(destination_value, Piece):
-                destination_piece_color = destination_value.get_color()
-                # cannot move on top of own piece
-                if destination_piece_color == current_player:
-                    self._last_error = 'Destination occupied by your own piece.'
-                    return False
-                self._board[end_row_index][end_column_index] = selected_piece
-                self._board[start_row_index][start_column_index] = None
-                if destination_value.get_name() == 'cuttlefish':
-                    if destination_value.get_color() == 'amethyst':
-                        self._game_state = 'TOPAZ_WON'
-                    else:
-                        self._game_state = 'AMETHYST_WON'
-                    return True # do not increment turn
-                else:
-                    self._current_turn += 1
-                    return True
+        # Move the piece
+        self._board[end_row_index][end_column_index] = selected_piece
+        self._board[start_row_index][start_column_index] = None
 
-            elif destination_value is None: # legal move, update origin and destination values
-                self._board[end_row_index][end_column_index] = selected_piece
-                self._board[start_row_index][start_column_index] = None
-                # increment turn and return True
-                self._current_turn += 1
-                self._last_error = None
-                return True
+        # Handle capture of cuttlefish (end game)
+        if is_capture and isinstance(destination_value, Piece) and destination_value.get_name() == 'cuttlefish':
+            if destination_value.get_color() == 'amethyst':
+                self._game_state = 'TANGERINE_WON'
             else:
-                message = f'unknown piece on board: {destination_value}'
-                raise UnknownValueException(message)
+                self._game_state = 'AMETHYST_WON'
+            # do not increment turn when game ends
+            return True
+
+        # Normal move - increment turn
+        self._current_turn += 1
+        self._last_error = None
+        return True
 
     def get_last_error(self) -> Optional[str]:
         """Return the last error message set by make_move when it returns False."""
@@ -379,8 +312,8 @@ class AnimalGame:
         start_column, start_row = start[0], start[1]
 
         # Check if move is in bounds
-        if not self._validate_move_in_bounds(start_column, start_row, start_column, start_row):
-            return valid_moves
+        # if not self._validate_move_in_bounds(start_column, start_row, start_column, start_row):
+        #     return valid_moves
 
         start_row_index = int(start_row) - 1
         start_column_index = self._map_column_to_index(start_column)
@@ -631,5 +564,3 @@ if __name__ == '__main__':
             print('Game ended.')
     except (KeyboardInterrupt, EOFError):
         print('\nInterrupted. Exiting.')
-
-# Unit tests moved to test_animal_game.py
