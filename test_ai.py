@@ -1,6 +1,6 @@
 import unittest
 import random
-from AnimalGame import AnimalGame
+from Animal_Game import AnimalGame
 from pieces import Chinchilla, Wombat, Emu
 from ai import ai_choose_move
 

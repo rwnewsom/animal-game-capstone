@@ -1,5 +1,5 @@
 import unittest
-from AnimalGame import AnimalGame, UnknownValueException
+from Animal_Game import AnimalGame, UnknownValueException
 from pieces import Chinchilla, Wombat, Emu, Cuttlefish
 
 

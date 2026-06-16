@@ -4,7 +4,7 @@ Demonstration of the new UI/UX improvements for Animal Game
 Shows: Two-step move selection and visual board highlights
 """
 
-from AnimalGame import AnimalGame
+from Animal_Game import AnimalGame
 
 def demo_valid_destinations():
     """Demonstrate the new get_valid_destinations method"""

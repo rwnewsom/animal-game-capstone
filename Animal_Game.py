@@ -34,7 +34,9 @@ class AnimalGame:
         self._columns: List[str] = ['a', 'b', 'c', 'd', 'e', 'f', 'g']
         self._rows: List[int] = [1, 2, 3, 4, 5, 6, 7]
         # initialize board (use None for empty squares rather than '.')
-        self._board: List[List[Optional[Piece]]] = [[None for _ in range(len(self._columns))] for _ in range(len(self._rows))]
+        self._board: List[List[Optional[Piece]]] = [
+            [None for _ in range(len(self._columns))] for _ in range(len(self._rows))
+        ]
         # pieces are placed in this order...
         self._animal_order: List[Type[Piece]] = [Chinchilla, Wombat, Emu, Cuttlefish, Emu, Wombat, Chinchilla]
         # ... on the first and last row
@@ -67,7 +69,9 @@ class AnimalGame:
         :param selected_square: algebraic notation of selected piece (e.g., 'a1')
         :param valid_destinations: list of algebraic notations for valid move destinations
         """
-        print(f'Board for turn: {self._current_turn}    Status: {self._game_state}    Player: {self._get_current_player()}')
+        print(
+            f'Board for turn: {self._current_turn}    Status: {self._game_state}    Player: {self._get_current_player()}'
+        )
         cols = self._columns
         label_w = 3  # width reserved for the row labels (e.g. ' 1')
         cell_w = 5   # inner content width for each cell
@@ -451,7 +455,7 @@ def _prompt_piece_selection(game: 'AnimalGame', player: str, prompt_text: str) -
             continue
 
         if piece.get_color() != player:
-            print(f"That piece belongs to the opponent. Select one of your own pieces.")
+            print("That piece belongs to the opponent. Select one of your own pieces.")
             continue
 
         return piece_notation
@@ -474,7 +478,7 @@ def _prompt_destination_selection(game: 'AnimalGame', start: str, prompt_text: s
             continue
 
         # Check if move is legal
-        is_legal, is_capture, error = game.is_legal_move(start, dest_notation)
+        is_legal, _, error = game.is_legal_move(start, dest_notation)
         if not is_legal:
             print(f"Illegal move. Reason: {error}")
             continue
@@ -483,7 +487,8 @@ def _prompt_destination_selection(game: 'AnimalGame', start: str, prompt_text: s
 
 
 def _prompt_move_input(prompt_text: str) -> tuple:
-    """Helper to get start/end from a player's input. Reprompts on malformed input. Returns (start, end) or (None, None) if quit."""
+    """Helper to get start/end from a player's input. Reprompts on malformed input.
+    Returns (start, end) or (None, None) if quit."""
     while True:
         raw = input(prompt_text).strip()
         if raw.lower() in ('q', 'quit', 'exit'):
@@ -557,7 +562,7 @@ if __name__ == '__main__':
         game.show_board()
         state = game.get_game_state()
         if state == 'TOPAZ_WON':
-             print('TOPAZ has won!')
+            print('TOPAZ has won!')
         elif state == 'AMETHYST_WON':
             print('Amethyst has won!')
         else:
