@@ -18,12 +18,12 @@ def demo_valid_destinations():
     print("\n1. INITIAL BOARD STATE:\n")
     game.show_board()
 
-    # Select tangerine's emu at a2 and show its valid destinations
-    print("\n2. SELECTING PIECE AT 'a2' (Tangerine Emu)\n")
+    # Select topaz's emu at a2 and show its valid destinations
+    print("\n2. SELECTING PIECE AT 'a2' (Topaz Emu)\n")
     selected_piece = "a2"
     valid_dests = game.get_valid_destinations(selected_piece)
 
-    print(f"   Piece: Tangerine Emu")
+    print(f"   Piece: Topaz Emu")
     print(f"   Valid destinations: {sorted(valid_dests)}\n")
 
     # Show board with selected piece highlighted and valid destinations marked
@@ -34,11 +34,11 @@ def demo_valid_destinations():
     game._print_board(selected_square=selected_piece, valid_destinations=valid_dests)
 
     # Try another piece - wombat at b1
-    print("\n4. SELECTING PIECE AT 'b1' (Tangerine Wombat)\n")
+    print("\n4. SELECTING PIECE AT 'b1' (Topaz Wombat)\n")
     selected_piece = "b1"
     valid_dests = game.get_valid_destinations(selected_piece)
 
-    print(f"   Piece: Tangerine Wombat")
+    print(f"   Piece: Topaz Wombat")
     print(f"   Valid destinations: {sorted(valid_dests)}\n")
 
     print("5. BOARD WITH HIGHLIGHTS FOR WOMBAT:\n")

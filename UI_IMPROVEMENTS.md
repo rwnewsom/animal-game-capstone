@@ -11,7 +11,7 @@ Instead of entering both the source and destination in one line (e.g., `a1 a2`),
 **Step 1: Select a Piece**
 ```
 ==================================================
-tangerine - Select piece to move (e.g., 'a1') or 'q' to quit: a2
+topaz - Select piece to move (e.g., 'a1') or 'q' to quit: a2
 ```
 
 **Step 2: See Valid Moves & Choose Destination**
@@ -19,7 +19,7 @@ tangerine - Select piece to move (e.g., 'a1') or 'q' to quit: a2
 Board with highlights displayed...
 
 ==================================================
-tangerine - Move to (valid: a3, a4, b3) or 'c' to cancel: a3
+topaz - Move to (valid: a3, a4, b3) or 'c' to cancel: a3
 ==================================================
 ```
 
@@ -34,7 +34,7 @@ The board now displays:
 
 Example board display after selecting `a2`:
 ```
-Board for turn: 0    Status: UNFINISHED    Player: tangerine
+Board for turn: 0    Status: UNFINISHED    Player: topaz
       +-------+-------+-------+-------+-------+-------+-------+
       |   a   |   b   |   c   |   d   |   e   |   f   |   g   |
       +-------+-------+-------+-------+-------+-------+-------+
@@ -108,22 +108,22 @@ Guides user through destination selection with validation:
 
 **Before:**
 ```
-tangerine move (e.g. 'a1 a2') or 'q' to quit: a1 a4
+topaz move (e.g. 'a1 a2') or 'q' to quit: a1 a4
 Illegal move. Reason: Move is too far for this piece.
-tangerine move (e.g. 'a1 a2') or 'q' to quit: a1 a3
+topaz move (e.g. 'a1 a2') or 'q' to quit: a1 a3
 Move accepted.
 ```
 
 **After:**
 ```
 ==================================================
-tangerine - Select piece to move (e.g., 'a1') or 'q' to quit: a1
+topaz - Select piece to move (e.g., 'a1') or 'q' to quit: a1
 
 [board displays with a1 highlighted and valid destinations shown]
 
-tangerine - Move to (valid: a2, a3, b2, b3) or 'c' to cancel: a4
+topaz - Move to (valid: a2, a3, b2, b3) or 'c' to cancel: a4
 Illegal move. Reason: Move is blocked by another piece.
-tangerine - Move to (valid: a2, a3, b2, b3) or 'c' to cancel: a3
+topaz - Move to (valid: a2, a3, b2, b3) or 'c' to cancel: a3
 ==================================================
 
 ✓ Move accepted.

@@ -8,6 +8,8 @@ Most recently the UI was modified to first select a piece and then show the vali
 having the user enter both the source and destination in one line.  The board also now shows visual highlights for the 
 selected piece and the valid moves.
 
+Note: Original Instruction refer to Tangerine pieces, I have renamed them as Topaz.
+
 # portfolio-project [Original Instructions]
 
 Write a class named **AnimalGame** for playing an animal-themed abstract board game, described below.

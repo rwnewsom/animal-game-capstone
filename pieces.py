@@ -11,7 +11,7 @@ class Piece:
     distance: int - the number of spaces the piece can move
     locomotion: str - jumping or sliding
     captured: str - whether the piece has been captured
-    color: str - amethyst or tangerine
+    color: str - amethyst or topaz
     """
     def __init__(self, name=None, direction=None, distance=None, locomotion=None, color=None):
         self._name = name
@@ -19,7 +19,7 @@ class Piece:
         self._distance = distance
         self._locomotion = locomotion
         self._captured = False
-        self._color = color # tangerine or amethyst
+        self._color = color # topaz or amethyst
 
     def get_name(self):
         return self._name

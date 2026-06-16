@@ -23,14 +23,14 @@ class AnimalGame:
     The animal game initializes a 7 x 7 game board,
     sets the starting game state and turn,
     and places starting pieces for each player.
-    potential states are 'UNFINISHED', 'TANGERINE_WON', 'AMETHYST_WON'
+    potential states are 'UNFINISHED', 'TOPAZ_WON', 'AMETHYST_WON'
 
-    the two players are designated tangerine & amethyst, pieces are initialized with the respective color
+    the two players are designated topaz & amethyst, pieces are initialized with the respective color
     """
     def __init__(self):
         self._current_turn = 0
         self._game_state = 'UNFINISHED'
-        self._turn_order = ['tangerine', 'amethyst']
+        self._turn_order = ['topaz', 'amethyst']
         self._columns: List[str] = ['a', 'b', 'c', 'd', 'e', 'f', 'g']
         self._rows: List[int] = [1, 2, 3, 4, 5, 6, 7]
         # initialize board (use None for empty squares rather than '.')
@@ -133,7 +133,7 @@ class AnimalGame:
 
     def get_game_state(self):
         """ retrieve the current state of the game, which is initially 'UNFINISHED',
-        however may become either 'TANGERINE_WON' OR 'AMETHYST_WON' """
+        however may become either 'TOPAZ_WON' OR 'AMETHYST_WON' """
         return self._game_state
 
     def _map_column_to_index(self, column: str) -> int:
@@ -341,7 +341,7 @@ class AnimalGame:
                 self._board[start_row_index][start_column_index] = None
                 if destination_value.get_name() == 'cuttlefish':
                     if destination_value.get_color() == 'amethyst':
-                        self._game_state = 'TANGERINE_WON'
+                        self._game_state = 'TOPAZ_WON'
                     else:
                         self._game_state = 'AMETHYST_WON'
                     return True # do not increment turn
@@ -568,7 +568,7 @@ if __name__ == '__main__':
         while game.get_game_state() == 'UNFINISHED':
             game.show_board()
             current = game._get_current_player()
-            # human plays tangerine; AI plays amethyst
+            # human plays topaz; AI plays amethyst
             if current == 'amethyst':
                 start, end = ai_choose_move(game, 'amethyst')
                 if start is None:
@@ -623,8 +623,8 @@ if __name__ == '__main__':
         print('\nFinal board:')
         game.show_board()
         state = game.get_game_state()
-        if state == 'TANGERINE_WON':
-             print('Tangerine has won!')
+        if state == 'TOPAZ_WON':
+             print('TOPAZ has won!')
         elif state == 'AMETHYST_WON':
             print('Amethyst has won!')
         else:

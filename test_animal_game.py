@@ -51,10 +51,10 @@ class TestAnimalGame(unittest.TestCase):
         self.assertIsInstance(game, AnimalGame)
 
     def test_get_current_player(self):
-        """first player should be tangerine"""
+        """first player should be topaz"""
         game = AnimalGame()
         current_player = game._get_current_player()
-        self.assertEqual(current_player, 'tangerine')
+        self.assertEqual(current_player, 'topaz')
 
     def test_get_current_turn(self):
         """game should initialize at turn 0"""
@@ -73,11 +73,11 @@ class TestAnimalGame(unittest.TestCase):
         """
         game = AnimalGame()
         # creature on first row, first column should be a Chinchilla
-        initial_tangerine_piece = game._board[0][0]
-        self.assertIsInstance(initial_tangerine_piece, Chinchilla)
+        initial_topaz_piece = game._board[0][0]
+        self.assertIsInstance(initial_topaz_piece, Chinchilla)
         # and type should match current player
         current_player = game._get_current_player()
-        self.assertEqual(initial_tangerine_piece.get_color(), current_player)
+        self.assertEqual(initial_topaz_piece.get_color(), current_player)
 
         # creature on last row, first column should also be a Chinchilla
         initial_amethyst_piece = game._board[6][0]

@@ -13,7 +13,7 @@ class TestAI(unittest.TestCase):
         game._board = [[None for _ in range(len(game._columns))] for _ in range(len(game._rows))]
         # place AI piece (amethyst) at a3 and opponent at a1 so a3->a1 is a legal capture
         game._board[2][0] = Emu(color='amethyst')
-        game._board[0][0] = Chinchilla(color='tangerine')
+        game._board[0][0] = Chinchilla(color='topaz')
         # ensure it's amethyst's turn
         game._current_turn = 1
 
