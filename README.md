@@ -1,4 +1,14 @@
-# portfolio-project
+# Animal Game
+
+I started this as a final project for the OSU CS162 Intro to Computer Science Course.
+
+I'll be improving it intermittently over time, but the original instructions for the project are included below. 
+
+Most recently the UI was modified to first select a piece and then show the valid moves for that piece, instead of 
+having the user enter both the source and destination in one line.  The board also now shows visual highlights for the 
+selected piece and the valid moves.
+
+# portfolio-project [Original Instructions]
 
 Write a class named **AnimalGame** for playing an animal-themed abstract board game, described below.
 
