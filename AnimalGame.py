@@ -5,6 +5,7 @@
 
 
 # Unit tests moved to test_animal_game.py
+from typing import List, Optional, Tuple, Type
 
 
 class UnknownValueException(Exception):
@@ -170,14 +171,14 @@ class AnimalGame:
         self._current_turn = 0
         self._game_state = 'UNFINISHED'
         self._turn_order = ['tangerine', 'amethyst']
-        self._columns = ['a', 'b', 'c', 'd', 'e', 'f', 'g']
-        self._rows = [1, 2, 3, 4, 5, 6, 7]
-        # initialize board
-        self._board = [['.' for _ in range(len(self._columns))] for _ in range(len(self._rows))]
+        self._columns: List[str] = ['a', 'b', 'c', 'd', 'e', 'f', 'g']
+        self._rows: List[int] = [1, 2, 3, 4, 5, 6, 7]
+        # initialize board (use None for empty squares rather than '.')
+        self._board: List[List[Optional[Piece]]] = [[None for _ in range(len(self._columns))] for _ in range(len(self._rows))]
         # pieces are placed in this order...
-        self._animal_order = [Chinchilla, Wombat, Emu, Cuttlefish, Emu, Wombat, Chinchilla]
+        self._animal_order: List[Type[Piece]] = [Chinchilla, Wombat, Emu, Cuttlefish, Emu, Wombat, Chinchilla]
         # ... on the first and last row
-        self._starting_rows = [0, 6]
+        self._starting_rows: List[int] = [0, 6]
         self._setup_game()
 
     def _setup_game(self):
@@ -191,10 +192,10 @@ class AnimalGame:
                 animal = animal(color=color)
                 self._board[j][i] = animal
 
-    def _get_current_player(self):
+    def _get_current_player(self) -> str:
         return self._turn_order[self._current_turn % 2]
 
-    def _get_current_turn(self):
+    def _get_current_turn(self) -> int:
         return self._current_turn
 
     def _print_board(self):
@@ -216,13 +217,13 @@ class AnimalGame:
         however may become either 'TANGERINE_WON' OR 'AMETHYST_WON' """
         return self._game_state
 
-    def _map_column_to_index(self, column):
+    def _map_column_to_index(self, column: str) -> int:
         """helper function that converts char to its array index
         column: char - the column (a..g) to be mapped
         """
         return self._columns.index(column)
 
-    def _validate_move_in_bounds(self, start_column, start_row, end_column, end_row):
+    def _validate_move_in_bounds(self, start_column: str, start_row: int, end_column: str, end_row: int) -> bool:
         """
         Check if either starting or ending coordinates are not within bounds of the game board
         :param start_column: char - starting column for piece
@@ -238,7 +239,7 @@ class AnimalGame:
         else:
             return True
 
-    def _calculate_distance(self, start_row, start_column, end_row, end_column):
+    def _calculate_distance(self, start_row: int, start_column: int, end_row: int, end_column: int) -> Tuple[int, int]:
         """
         determine how many positions the piece will move
         :param start_column: int - starting column for piece
@@ -251,7 +252,7 @@ class AnimalGame:
         column_distance = start_column - end_column
         return row_distance, column_distance
 
-    def _is_counter_move(self, piece, is_orthogonal):
+    def _is_counter_move(self, piece: Piece, is_orthogonal: bool) -> bool:
         """
 
         :param piece: Piece object
@@ -267,7 +268,7 @@ class AnimalGame:
                 return True
             return False
 
-    def _is_move_blocked(self, start_row, start_column, end_row, end_column):
+    def _is_move_blocked(self, start_row: int, start_column: int, end_row: int, end_column: int) -> bool:
         """
         determine how many positions the piece will move
         :param start_column: int - starting column for piece
@@ -320,13 +321,16 @@ class AnimalGame:
         selected_piece = self._board[start_row_index][start_column_index]
 
         # a piece must exist at the selected location
-        if selected_piece == '.':
+        if selected_piece is None:
             return False
 
         elif not isinstance(selected_piece, Piece):
             # somehow an inappropriate value has been recorded on the board, perhaps a piece from a monopoly game?
             message = f'unknown piece on board: {selected_piece}'
             raise UnknownValueException(message)
+
+        # Help static analyzers: by this point selected_piece is guaranteed to be a Piece
+        assert isinstance(selected_piece, Piece)
 
         selected_piece_color = selected_piece.get_color()
         current_player = self._get_current_player()
@@ -384,7 +388,7 @@ class AnimalGame:
                 if destination_piece_color == current_player:
                     return False
                 self._board[end_row_index][end_column_index] = selected_piece
-                self._board[start_row_index][start_column_index] = '.'
+                self._board[start_row_index][start_column_index] = None
                 if destination_value.get_name() == 'cuttlefish':
                     if destination_value.get_color() == 'amethyst':
                         self._game_state = 'TANGERINE_WON'
@@ -395,12 +399,14 @@ class AnimalGame:
                     self._current_turn += 1
                     return True
 
-            elif destination_value == '.': # legal move, update origin and destination values
+            elif destination_value is None: # legal move, update origin and destination values
                 self._board[end_row_index][end_column_index] = selected_piece
-                self._board[start_row_index][start_column_index] = '.'
+                self._board[start_row_index][start_column_index] = None
                 # increment turn and return True
                 self._current_turn += 1
                 return True
             else:
                 message = f'unknown piece on board: {destination_value}'
                 raise UnknownValueException(message)
+
+# Unit tests moved to test_animal_game.py

@@ -185,7 +185,8 @@ class TestAnimalGame(unittest.TestCase):
         error should be raised if a value is on the board other than '.' or a Piece object
         """
         game = AnimalGame()
-        game._board[0][0] = None
+        # None is now used for empty squares; use a distinct invalid value to trigger the exception
+        game._board[0][0] = "INVALID"
         with self.assertRaises(UnknownValueException):
             game.make_move('a1', 'a2')
 
@@ -220,4 +221,3 @@ class TestAnimalGame(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-
