@@ -3,6 +3,14 @@
   <component name="CopilotDiffPersistence">
     <option name="pendingDiffs">
       <map>
+        <entry key="$PROJECT_DIR$/.gitignore">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/.gitignore" />
+              <option name="updatedContent" value="# Byte-compiled / optimized / DLL files&#10;__pycache__/&#10;*.py[cod]&#10;*$py.class&#10;&#10;# C extensions&#10;*.so&#10;&#10;# Distribution / packaging&#10;.Python&#10;build/&#10;develop-eggs/&#10;dist/&#10;download/&#10;eggs/&#10;.eggs/&#10;lib/&#10;lib64/&#10;parts/&#10;sdist/&#10;.var/&#10;*.egg-info/&#10;.installed.cfg&#10;*.egg&#10;pip-wheel-metadata/&#10;share/python-wheels/&#10;&#10;# Virtual environments&#10;.env&#10;.env/&#10;venv/&#10;venv*/&#10;.venv/&#10;env/&#10;ENV/&#10;&#10;# PyCharm&#10;.idea/&#10;*.iml&#10;&#10;# VS Code&#10;.vscode/&#10;&#10;# Unit test / coverage&#10;.pytest_cache/&#10;.tox/&#10;.coverage&#10;coverage.xml&#10;nosetests.xml&#10;test_results/&#10;&#10;# Mypy&#10;.mypy_cache/&#10;&#10;# Cache&#10;.cache/&#10;&#10;# Logs&#10;*.log&#10;&#10;# OS files&#10;.DS_Store&#10;Thumbs.db&#10;&#10;# Database&#10;*.sqlite3&#10;" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
         <entry key="$PROJECT_DIR$/AnimalGame.py">
           <value>
             <PendingDiffInfo>
