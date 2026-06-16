@@ -60,16 +60,38 @@ class AnimalGame:
     def _get_current_turn(self) -> int:
         return self._current_turn
 
-    def _print_board(self):
-        """Display the current board in a compact ASCII grid for debugging.
+    def _print_board(self, selected_square: Optional[str] = None, valid_destinations: Optional[List[str]] = None):
+        """Display the current board in a compact ASCII grid with optional highlights.
 
         Uses fixed-width cells so headers, separators and rows align exactly.
+        :param selected_square: algebraic notation of selected piece (e.g., 'a1')
+        :param valid_destinations: list of algebraic notations for valid move destinations
         """
         print(f'Board for turn: {self._current_turn}    Status: {self._game_state}    Player: {self._get_current_player()}')
         cols = self._columns
         label_w = 3  # width reserved for the row labels (e.g. ' 1')
         cell_w = 5   # inner content width for each cell
         cell_total = cell_w + 2  # includes one space padding on each side
+
+        # Parse selected square if provided
+        selected_row_idx, selected_col_idx = None, None
+        if selected_square:
+            try:
+                selected_col_idx = self._map_column_to_index(selected_square[0])
+                selected_row_idx = int(selected_square[1]) - 1
+            except (IndexError, ValueError):
+                pass
+
+        # Convert valid destinations to coordinate indices
+        valid_coords = set()
+        if valid_destinations:
+            for dest in valid_destinations:
+                try:
+                    col_idx = self._map_column_to_index(dest[0])
+                    row_idx = int(dest[1]) - 1
+                    valid_coords.add((row_idx, col_idx))
+                except (IndexError, ValueError):
+                    pass
 
         # separator line (top and between rows)
         sep = ' ' * (label_w + 1) + '+' + '+'.join(['-' * cell_total for _ in cols]) + '+'
@@ -84,11 +106,27 @@ class AnimalGame:
         for r_idx, row in enumerate(self._board):
             row_label = f'{r_idx+1:>{label_w}}'
             cells = []
-            for c in row:
-                if isinstance(c, Piece):
-                    cells.append(f'{str(c):^{cell_total}}')
+            for c_idx, cell in enumerate(row):
+                # Determine cell content and highlight
+                if r_idx == selected_row_idx and c_idx == selected_col_idx:
+                    # Selected piece - highlight with brackets
+                    if isinstance(cell, Piece):
+                        content = f'[{str(cell)}]'
+                    else:
+                        content = '[  ]'
+                elif (r_idx, c_idx) in valid_coords:
+                    # Valid destination - show with dots
+                    if isinstance(cell, Piece):
+                        content = f'*{str(cell)}*'
+                    else:
+                        content = ' . '
                 else:
-                    cells.append(' ' * cell_total)
+                    # Normal cell
+                    if isinstance(cell, Piece):
+                        content = f'{str(cell)}'
+                    else:
+                        content = ''
+                cells.append(f'{content:^{cell_total}}')
             row_str = f'{row_label} |' + '|'.join(cells) + '|'
             print(row_str)
             print(sep)
@@ -323,8 +361,45 @@ class AnimalGame:
                 raise UnknownValueException(message)
 
     def get_last_error(self) -> Optional[str]:
-         """Return the last error message set by make_move when it returns False."""
-         return self._last_error
+        """Return the last error message set by make_move when it returns False."""
+        return self._last_error
+
+    def get_valid_destinations(self, start: str) -> List[str]:
+        """Get all valid destination squares for a piece at the given position.
+
+        :param start: algebraic notation of starting position (e.g., 'a1')
+        :return: list of valid destination squares in algebraic notation
+        """
+        valid_moves = []
+
+        # Validate starting position
+        if not start or len(start) < 2:
+            return valid_moves
+
+        start_column, start_row = start[0], start[1]
+
+        # Check if move is in bounds
+        if not self._validate_move_in_bounds(start_column, start_row, start_column, start_row):
+            return valid_moves
+
+        start_row_index = int(start_row) - 1
+        start_column_index = self._map_column_to_index(start_column)
+        selected_piece = self._board[start_row_index][start_column_index]
+
+        # No piece at starting location
+        if selected_piece is None or not isinstance(selected_piece, Piece):
+            return valid_moves
+
+        # Try all possible destinations on the board
+        for end_row in self._rows:
+            for end_col in self._columns:
+                end_notation = f'{end_col}{end_row}'
+                # Check if this move would be legal
+                is_legal, _, _ = self.is_legal_move(start, end_notation, player=selected_piece.get_color())
+                if is_legal:
+                    valid_moves.append(end_notation)
+
+        return valid_moves
 
     def is_legal_move(self, start: str, end: str, player: Optional[str] = None) -> Tuple[bool, bool, Optional[str]]:
         """Check whether a move would be legal without mutating game state.
@@ -417,6 +492,63 @@ class AnimalGame:
         self._print_board()
 
 
+def _prompt_piece_selection(game: 'AnimalGame', player: str, prompt_text: str) -> Optional[str]:
+    """Helper to get piece selection from player. Returns algebraic notation or None if quit."""
+    while True:
+        raw = input(prompt_text).strip()
+        if raw.lower() in ('q', 'quit', 'exit'):
+            return None
+        if len(raw) < 2:
+            print("Invalid input. Enter piece location as: 'a1' or 'q' to quit.")
+            continue
+        piece_notation = raw[:2]
+
+        # Validate the notation format
+        if piece_notation[0] not in game._columns or piece_notation[1] not in [str(r) for r in game._rows]:
+            print(f"Invalid square: '{piece_notation}'. Enter move as: 'a1' or 'q' to quit.")
+            continue
+
+        # Check if piece exists and belongs to player
+        start_col_idx = game._map_column_to_index(piece_notation[0])
+        start_row_idx = int(piece_notation[1]) - 1
+        piece = game._board[start_row_idx][start_col_idx]
+
+        if piece is None:
+            print(f"No piece at {piece_notation}. Select a piece to move.")
+            continue
+
+        if piece.get_color() != player:
+            print(f"That piece belongs to the opponent. Select one of your own pieces.")
+            continue
+
+        return piece_notation
+
+
+def _prompt_destination_selection(game: 'AnimalGame', start: str, prompt_text: str) -> Optional[str]:
+    """Helper to get destination from player. Returns algebraic notation or None if cancel."""
+    while True:
+        raw = input(prompt_text).strip()
+        if raw.lower() in ('c', 'cancel'):
+            return None
+        if len(raw) < 2:
+            print("Invalid input. Enter destination as: 'a3' or 'c' to cancel.")
+            continue
+        dest_notation = raw[:2]
+
+        # Validate the notation format
+        if dest_notation[0] not in game._columns or dest_notation[1] not in [str(r) for r in game._rows]:
+            print(f"Invalid square: '{dest_notation}'. Enter move as: 'a3' or 'c' to cancel.")
+            continue
+
+        # Check if move is legal
+        is_legal, is_capture, error = game.is_legal_move(start, dest_notation)
+        if not is_legal:
+            print(f"Illegal move. Reason: {error}")
+            continue
+
+        return dest_notation
+
+
 def _prompt_move_input(prompt_text: str) -> tuple:
     """Helper to get start/end from a player's input. Reprompts on malformed input. Returns (start, end) or (None, None) if quit."""
     while True:
@@ -444,25 +576,55 @@ if __name__ == '__main__':
                     break
                 print(f"AI ({current}) plays: {start} {end}")
             else:
-                start, end = _prompt_move_input(f"{current} move (e.g. 'a1 a2') or 'q' to quit: ")
+                # Two-step move selection for human player
+                print("\n" + "="*50)
+                start = _prompt_piece_selection(
+                    game,
+                    current,
+                    f"{current} - Select piece to move (e.g., 'a1') or 'q' to quit: "
+                )
                 if start is None:
                     print('Exiting game.')
                     break
+
+                # Show valid destinations
+                valid_destinations = game.get_valid_destinations(start)
+                if not valid_destinations:
+                    print(f"No legal moves available for piece at {start}. Try another piece.")
+                    print("="*50 + "\n")
+                    continue
+
+                # Display board with selected piece and valid destinations highlighted
+                game._print_board(selected_square=start, valid_destinations=valid_destinations)
+
+                # Get destination
+                dest_list = ", ".join(sorted(valid_destinations))
+                end = _prompt_destination_selection(
+                    game,
+                    start,
+                    f"{current} - Move to (valid: {dest_list}) or 'c' to cancel: "
+                )
+                if end is None:
+                    print("Move cancelled. Try again.")
+                    print("="*50 + "\n")
+                    continue
+                print("="*50 + "\n")
+
             try:
                 moved = game.make_move(start, end)
             except UnknownValueException as e:
                 print(f'Error: {e}')
                 continue
             if moved:
-                print('Move accepted.')
+                print('✓ Move accepted.')
             else:
-                print(f"Illegal move. Reason: {game.get_last_error()}")
+                print(f"✗ Illegal move. Reason: {game.get_last_error()}")
         # final state
         print('\nFinal board:')
         game.show_board()
         state = game.get_game_state()
         if state == 'TANGERINE_WON':
-            print('Tangerine has won!')
+             print('Tangerine has won!')
         elif state == 'AMETHYST_WON':
             print('Amethyst has won!')
         else:
